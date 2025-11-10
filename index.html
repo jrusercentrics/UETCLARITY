@@ -3,41 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consent Mode Sandbox</title>
-  
-    
-    <script id="usercentrics-cmp" src="https://app.usercentrics.eu/browser-ui/latest/loader.js" data-settings-id="9S0YpI7VSssd1D" async></script>
+  <title>Consent Mode Sandbox - Debug Version</title>
+
+  <!-- Usercentrics CMP -->
+  <script id="usercentrics-cmp"
+          src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
+          data-settings-id="9S0YpI7VSssd1D"
+          async>
+  </script>
+
   <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-M75CJDXK');</script>
-<!-- End Google Tag Manager -->
+  <script>
+  (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;
+      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M75CJDXK');
+  </script>
+  <!-- End Google Tag Manager -->
+
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    // Default consent mode (everything denied until user acts)
+    // Default consent (denied)
     gtag('consent', 'default', {
       'ad_storage': 'denied',
       'analytics_storage': 'denied'
     });
+
+    // Function to read current consent status
+    function checkConsentState() {
+      gtag('get', 'consent', 'default', function(consent){
+        console.log("Current consent state:", consent);
+        const output = document.getElementById('output');
+        output.innerHTML = `
+          <strong>Current Consent State:</strong><br>
+          ad_storage: ${consent.ad_storage}<br>
+          analytics_storage: ${consent.analytics_storage}<br>
+          <hr>
+          <strong>Clarity loaded:</strong> ${window.clarity ? '✅ Yes' : '❌ No'}<br>
+          <strong>UET loaded:</strong> ${window.uetq ? '✅ Yes' : '❌ No'}<br>
+        `;
+      });
+    }
   </script>
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M75CJDXK"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
-  <h1>Consent Mode Demo Page</h1>
-  <p>This page simulates how Consent Mode works.</p>
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M75CJDXK"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <h1>Consent Mode Debug Page</h1>
+  <p>This page simulates Consent Mode + CMP + Microsoft integration.</p>
 
   <button onclick="grantConsent()">Accept All</button>
   <button onclick="denyConsent()">Reject All</button>
+  <button onclick="checkConsentState()">Check Consent State</button>
 
   <p id="status"></p>
+  <div id="output" style="background:#f4f4f4; padding:10px; margin-top:15px; border-radius:8px;"></div>
 
   <script>
     function grantConsent() {
@@ -46,6 +79,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         'analytics_storage': 'granted'
       });
       document.getElementById('status').textContent = "Consent granted ✅";
+      console.log("Consent granted ✅");
+      setTimeout(checkConsentState, 500);
     }
 
     function denyConsent() {
@@ -54,7 +89,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         'analytics_storage': 'denied'
       });
       document.getElementById('status').textContent = "Consent denied ❌";
+      console.log("Consent denied ❌");
+      setTimeout(checkConsentState, 500);
     }
+
+    // Automatically show initial status
+    window.addEventListener('load', () => setTimeout(checkConsentState, 1000));
   </script>
+
+  <!-- Microsoft UET -->
+  <script>
+    (function(w,d,t,r,u){
+      var f,n,i;w[u]=w[u]||[];
+      f=function(){
+        var o={ti:"97203970", enableAutoSpaTracking: true};
+        o.q=w[u]; w[u]=new UET(o); w[u].push("pageLoad");
+      };
+      n=d.createElement(t); n.src=r; n.async=1;
+      n.onload=n.onreadystatechange=function(){
+        var s=this.readyState;
+        if(!s || s==="loaded" || s==="complete"){f();n.onload=n.onreadystatechange=null;}
+      };
+      i=d.getElementsByTagName(t)[0];
+      i.parentNode.insertBefore(n,i);
+    })(window,document,"script","//bat.bing.com/bat.js","uetq");
+  </script>
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r); t.async=1;
+      t.src="https://www.clarity.ms/tag/YOUR-CLARITY-ID";
+      y=l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "YOUR-CLARITY-ID");
+  </script>
+
 </body>
 </html>
