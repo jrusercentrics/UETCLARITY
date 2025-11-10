@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consent Mode Sandbox - Debug Version</title>
+  <title>Consent Mode Sandbox - Debug Fixed</title>
 
   <!-- Usercentrics CMP -->
   <script id="usercentrics-cmp"
@@ -31,48 +31,27 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    // Default consent (denied)
+    // Default consent mode
     gtag('consent', 'default', {
       'ad_storage': 'denied',
       'analytics_storage': 'denied'
     });
 
-    // Function to read current consent status
-    function checkConsentState() {
-      gtag('get', 'consent', 'default', function(consent){
-        console.log("Current consent state:", consent);
-        const output = document.getElementById('output');
-        output.innerHTML = `
-          <strong>Current Consent State:</strong><br>
-          ad_storage: ${consent.ad_storage}<br>
-          analytics_storage: ${consent.analytics_storage}<br>
-          <hr>
-          <strong>Clarity loaded:</strong> ${window.clarity ? '✅ Yes' : '❌ No'}<br>
-          <strong>UET loaded:</strong> ${window.uetq ? '✅ Yes' : '❌ No'}<br>
-        `;
-      });
+    // Utility: display consent + tag state
+    function displayState() {
+      const clarityLoaded = typeof window.clarity === 'function';
+      const uetLoaded = typeof window.uetq !== 'undefined';
+      const output = document.getElementById('output');
+      output.innerHTML = `
+        <strong>Detected Tags:</strong><br>
+        Clarity loaded: ${clarityLoaded ? '✅ Yes' : '❌ No'}<br>
+        UET loaded: ${uetLoaded ? '✅ Yes' : '❌ No'}<br>
+        <hr>
+        <strong>Last consent action logged to console.</strong>
+      `;
+      console.log("Clarity loaded:", clarityLoaded, "| UET loaded:", uetLoaded);
     }
-  </script>
-</head>
-<body>
-  <!-- Google Tag Manager (noscript) -->
-  <noscript>
-    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M75CJDXK"
-            height="0" width="0" style="display:none;visibility:hidden"></iframe>
-  </noscript>
-  <!-- End Google Tag Manager (noscript) -->
 
-  <h1>Consent Mode Debug Page</h1>
-  <p>This page simulates Consent Mode + CMP + Microsoft integration.</p>
-
-  <button onclick="grantConsent()">Accept All</button>
-  <button onclick="denyConsent()">Reject All</button>
-  <button onclick="checkConsentState()">Check Consent State</button>
-
-  <p id="status"></p>
-  <div id="output" style="background:#f4f4f4; padding:10px; margin-top:15px; border-radius:8px;"></div>
-
-  <script>
     function grantConsent() {
       gtag('consent', 'update', {
         'ad_storage': 'granted',
@@ -80,7 +59,7 @@
       });
       document.getElementById('status').textContent = "Consent granted ✅";
       console.log("Consent granted ✅");
-      setTimeout(checkConsentState, 500);
+      setTimeout(displayState, 1000);
     }
 
     function denyConsent() {
@@ -90,14 +69,38 @@
       });
       document.getElementById('status').textContent = "Consent denied ❌";
       console.log("Consent denied ❌");
-      setTimeout(checkConsentState, 500);
+      setTimeout(displayState, 1000);
     }
 
-    // Automatically show initial status
-    window.addEventListener('load', () => setTimeout(checkConsentState, 1000));
-  </script>
+    function checkConsentState() {
+      // We’ll check GTM’s dataLayer snapshot instead
+      const consentEvent = dataLayer.find(e => e.event === 'default_consent_update' || e.event === 'consent_update');
+      console.log("dataLayer snapshot:", consentEvent);
+      displayState();
+    }
 
-  <!-- Microsoft UET -->
+    window.addEventListener('load', () => setTimeout(displayState, 2000));
+  </script>
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M75CJDXK"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- End GTM (noscript) -->
+
+  <h1>Consent Mode Debug Page</h1>
+  <p>This page checks whether consent, UET, and Clarity behave correctly through GTM.</p>
+
+  <button onclick="grantConsent()">Accept All</button>
+  <button onclick="denyConsent()">Reject All</button>
+  <button onclick="checkConsentState()">Check Consent State</button>
+
+  <p id="status"></p>
+  <div id="output" style="background:#f7f7f7; padding:10px; margin-top:15px; border-radius:8px;"></div>
+
+  <!-- Microsoft UET (manual) -->
   <script>
     (function(w,d,t,r,u){
       var f,n,i;w[u]=w[u]||[];
@@ -114,8 +117,6 @@
       i.parentNode.insertBefore(n,i);
     })(window,document,"script","//bat.bing.com/bat.js","uetq");
   </script>
-
-
 
 </body>
 </html>
