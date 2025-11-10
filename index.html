@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consent Mode Sandbox</title>
+  
+    
+    <script id="usercentrics-cmp" src="https://app.usercentrics.eu/browser-ui/latest/loader.js" data-settings-id="9S0YpI7VSssd1D" async></script>
+  <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-M75CJDXK');</script>
+<!-- End Google Tag Manager -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    // Default consent mode (everything denied until user acts)
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied'
+    });
+  </script>
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M75CJDXK"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+  <h1>Consent Mode Demo Page</h1>
+  <p>This page simulates how Consent Mode works.</p>
+
+  <button onclick="grantConsent()">Accept All</button>
+  <button onclick="denyConsent()">Reject All</button>
+
+  <p id="status"></p>
+
+  <script>
+    function grantConsent() {
+      gtag('consent', 'update', {
+        'ad_storage': 'granted',
+        'analytics_storage': 'granted'
+      });
+      document.getElementById('status').textContent = "Consent granted ✅";
+    }
+
+    function denyConsent() {
+      gtag('consent', 'update', {
+        'ad_storage': 'denied',
+        'analytics_storage': 'denied'
+      });
+      document.getElementById('status').textContent = "Consent denied ❌";
+    }
+  </script>
+</body>
+</html>
